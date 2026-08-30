@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fake Store API</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Fake Store</h1>
+    </header>
+
+
+    <main id="productsContainer">
+
+    </main>
+
+    <section class="firebase-section">
+
+    <h2>Add Product</h2>
+
+    <form id="productForm">
+
+        <input
+            type="text"
+            id="productTitle"
+            placeholder="Product Title"
+            required
+        >
+
+        <input
+            type="number"
+            id="productPrice"
+            placeholder="Product Price"
+            required
+        >
+
+        <textarea
+            id="productDescription"
+            placeholder="Product Description"
+            required
+        ></textarea>
+
+        <input
+            type="text"
+            id="productImage"
+            placeholder="Image URL"
+            required
+        >
+
+        <button type="submit">Add Product</button>
+
+    </form>
+
+
+    <h2>Firebase Products</h2>
+
+    <div id="firebaseProductsContainer"></div>
+
+</section>
+
+
+    <footer>
+        <p>Fake Store API</p>
+    </footer>
+
+
+<script type="module" src="app.js"></script>
+</body>
+
+</html>
