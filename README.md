@@ -1,57 +1,71 @@
 # Fake Store API & Firebase CRUD 🛍️
 
-A web training project built with HTML, CSS, and JavaScript to practice fetching API data, manipulating the DOM, and performing CRUD operations with Cloud Firestore.
+A web training project built with HTML, CSS, and JavaScript. It combines products fetched from the Fake Store API with products stored in Firebase Realtime Database.
+
+The project demonstrates API integration, DOM manipulation, pagination, and basic database operations.
 
 ## Features
 
 - Fetch and display products from the Fake Store API.
-- Show product titles, prices, descriptions, and images.
-- Add products to a separate Cloud Firestore collection.
-- Display Firestore products with real-time updates.
-- Edit Firestore products using browser prompts.
-- Delete products from Cloud Firestore.
+- Display API and database products together.
+- Paginate the combined list with six products per page.
+- Add database products through a separate page.
+- Receive database changes through a real-time listener.
+- Edit database products using browser prompts.
+- Soft-delete database products to hide them from the list.
 
-## How It Works
+Editing and deletion are available only for database products. API products are displayed without modification controls.
 
-The page displays two independent product collections:
+## How Soft Deletion Works
 
-1. **Fake Store API products:** fetched from an external API and displayed on the page.
-2. **Firestore products:** created through the form and stored in a Firebase project.
+Clicking Delete sets the product's `isDeleted` field to `true`.
 
-Adding, editing, or deleting Firestore products does not change the products returned by the Fake Store API.
+The record remains in Firebase, but the application filters it out of the displayed products. The current interface does not include a restore feature.
 
 ## Technologies
 
 - HTML
 - CSS
-- JavaScript
+- JavaScript ES Modules
 - Fetch API
 - Firebase JavaScript SDK
-- Cloud Firestore
+- Firebase Realtime Database
+
+## Project Files
+
+- `index.html` — product listing and pagination container
+- `app.js` — combines products, renders cards, and handles pagination and editing
+- `api.js` — fetches products from the Fake Store API
+- `database.js` — Firebase configuration and database operations
+- `add-product.html` — product creation form
+- `add-product.js` — handles form submission
+- `style.css` — page styling
 
 ## Run Locally
 
-1. Download or clone this repository.
+1. Clone or download this repository.
 2. Open the project folder in VS Code.
-3. To use your own database, create a Firebase project with a web app and enable Cloud Firestore.
-4. Replace the `firebaseConfig` values in `app.js` with your web app's configuration.
-5. Configure Firestore access rules for your intended development environment. Database access depends on these rules.
-6. Serve the project using a local web server, such as the VS Code Live Server extension.
-7. Open `index.html` through the local server.
+3. Create your own Firebase project, register a web app, and enable Realtime Database.
+4. Replace `firebaseConfig` in `database.js` with your configuration, including `databaseURL`.
+5. Configure Realtime Database rules for your intended development environment. Read and write access depend on these rules.
+6. Start a local web server, such as the VS Code Live Server extension.
+7. Open `index.html` through the server and use Add Product to create a database product.
+
+Products are stored under the `products` path. The application creates product records when the form is submitted.
 
 An internet connection is required for the external API and Firebase services.
 
 ## Project Scope
 
-This is a learning project focused on API integration and basic database operations.
+This is a training project focused on learning API integration and database operations. It is not a production-ready store.
 
-The current version uses browser prompts for editing and does not include user authentication. Input validation, network error handling, and mobile layouts are areas for further improvement.
+The current version:
 
-## Files
-
-- `index.html` — page structure and product form
-- `style.css` — page and product card styling
-- `app.js` — API requests, DOM updates, and Firestore operations
+- Uses browser prompts for editing.
+- Does not implement user authentication.
+- Needs stronger input validation and network error handling.
+- Does not include payment processing or order management.
+- May display an empty page if deleting the last product on the final page reduces the number of available pages.
 
 ## Author
 
