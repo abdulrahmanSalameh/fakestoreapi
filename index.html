@@ -13,7 +13,14 @@
 <body>
 
     <header>
+
         <h1>Fake Store</h1>
+
+        <nav>
+            <a href="index.html">Products</a>
+            <a href="add-product.html">Add Product</a>
+        </nav>
+
     </header>
 
 
@@ -21,49 +28,10 @@
 
     </main>
 
-    <section class="firebase-section">
 
-    <h2>Add Product</h2>
+    <div id="pagination">
 
-    <form id="productForm">
-
-        <input
-            type="text"
-            id="productTitle"
-            placeholder="Product Title"
-            required
-        >
-
-        <input
-            type="number"
-            id="productPrice"
-            placeholder="Product Price"
-            required
-        >
-
-        <textarea
-            id="productDescription"
-            placeholder="Product Description"
-            required
-        ></textarea>
-
-        <input
-            type="text"
-            id="productImage"
-            placeholder="Image URL"
-            required
-        >
-
-        <button type="submit">Add Product</button>
-
-    </form>
-
-
-    <h2>Firebase Products</h2>
-
-    <div id="firebaseProductsContainer"></div>
-
-</section>
+    </div>
 
 
     <footer>
@@ -71,7 +39,8 @@
     </footer>
 
 
-<script type="module" src="app.js"></script>
+    <script type="module" src="app.js"></script>
+
 </body>
 
 </html>

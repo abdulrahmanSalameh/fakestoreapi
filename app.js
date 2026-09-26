@@ -1,224 +1,194 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getApiProducts } from "./api.js";
 
 import {
-    getFirestore,
-    collection,
-    addDoc,
-    onSnapshot,
-    doc,
-    updateDoc,
-    deleteDoc
-} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyC52EfpeQ8IuS2fYI4qpADoKbB0jsJz9a8",
-    authDomain: "fakestoreapi-34fbe.firebaseapp.com",
-    projectId: "fakestoreapi-34fbe",
-    storageBucket: "fakestoreapi-34fbe.firebasestorage.app",
-    messagingSenderId: "827435428604",
-    appId: "1:827435428604:web:f409668df57b26d219c579",
-    measurementId: "G-YHTGV9D278"
-};
-
-
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
+    getProducts,
+    updateProduct,
+    softDeleteProduct
+} from "./database.js";
 
 
 let productsContainer = document.getElementById("productsContainer");
+let paginationContainer = document.getElementById("pagination");
+
+let apiProducts = [];
+let databaseProducts = [];
+
+let currentPage = 1;
+let productsPerPage = 6;
 
 
-fetch("https://fakestoreapi.com/products")
-    .then(response => response.json())
-    .then(data => {
+// Get products from Fake Store API
+async function loadApiProducts() {
 
-        data.map(product => {
+    apiProducts = await getApiProducts();
 
-            let card = document.createElement("div");
-            card.className = "card";
-
-
-            let title = document.createElement("h2");
-            title.textContent = product.title;
+    renderProducts();
+}
 
 
-            let price = document.createElement("p");
-            price.textContent = "Price: $" + product.price;
+// Get products from Realtime Database
+getProducts(function(products) {
 
-
-            let description = document.createElement("p");
-            description.textContent = product.description;
-
-
-            let image = document.createElement("img");
-            image.src = product.image;
-
-
-            card.appendChild(title);
-            card.appendChild(price);
-            card.appendChild(description);
-            card.appendChild(image);
-
-
-            productsContainer.appendChild(card);
-
-        })
-
-    })
-
-
-    let productForm = document.getElementById("productForm");
-
-productForm.addEventListener("submit", async function(event) {
-
-    event.preventDefault();
-
-
-    let title = document.getElementById("productTitle").value;
-
-    let price = document.getElementById("productPrice").value;
-
-    let description = document.getElementById("productDescription").value;
-
-    let image = document.getElementById("productImage").value;
-
-
-    await addDoc(collection(db, "products"), {
-
-        title: title,
-
-        price: price,
-
-        description: description,
-
-        image: image
-
+    databaseProducts = products.filter(product => {
+        return product.isDeleted !== true;
     });
 
-
-    productForm.reset();
-
+    renderProducts();
 });
 
 
-let firebaseProductsContainer =
-    document.getElementById("firebaseProductsContainer");
+// Combine API products and Database products
+function getAllProducts() {
+
+    let api = apiProducts.map(product => {
+        return {
+            ...product,
+            source: "api"
+        };
+    });
+
+    let database = databaseProducts.map(product => {
+        return {
+            ...product,
+            source: "database"
+        };
+    });
+
+    return [...api, ...database];
+}
 
 
-onSnapshot(collection(db, "products"), function(snapshot) {
+// Display products
+function renderProducts() {
 
-    firebaseProductsContainer.innerHTML = "";
+    let allProducts = getAllProducts();
 
+    productsContainer.innerHTML = "";
 
-    snapshot.forEach(function(productDoc) {
+    let start = (currentPage - 1) * productsPerPage;
+    let end = start + productsPerPage;
 
-        let product = productDoc.data();
+    let productsForPage = allProducts.slice(start, end);
 
-        let productId = productDoc.id;
+    productsForPage.forEach(product => {
+        createProductCard(product);
+    });
 
-
-        let card = document.createElement("div");
-
-        card.className = "card";
-
-
-        let title = document.createElement("h2");
-
-        title.textContent = product.title;
+    renderPagination(allProducts.length);
+}
 
 
-        let price = document.createElement("p");
+// Create product card
+function createProductCard(product) {
 
-        price.textContent = "Price: $" + product.price;
-
-
-        let description = document.createElement("p");
-
-        description.textContent = product.description;
+    let card = document.createElement("div");
+    card.className = "card";
 
 
-        let image = document.createElement("img");
+    let title = document.createElement("h2");
+    title.textContent = product.title;
 
-        image.src = product.image;
 
+    let price = document.createElement("p");
+    price.textContent = "Price: $" + product.price;
+
+
+    let description = document.createElement("p");
+    description.textContent = product.description;
+
+
+    let image = document.createElement("img");
+    image.src = product.image;
+
+
+    card.appendChild(title);
+    card.appendChild(price);
+    card.appendChild(description);
+    card.appendChild(image);
+
+
+    // Update and Delete only for Database products
+    if (product.source === "database") {
 
         let updateButton = document.createElement("button");
-
         updateButton.textContent = "Update";
 
 
         let deleteButton = document.createElement("button");
-
         deleteButton.textContent = "Delete";
+
+
+        updateButton.addEventListener("click", async function() {
+
+            let newTitle = prompt("Enter new title:", product.title);
+            let newPrice = prompt("Enter new price:", product.price);
+            let newDescription = prompt("Enter new description:", product.description);
+            let newImage = prompt("Enter new image URL:", product.image);
+
+
+            if (
+                newTitle === null ||
+                newPrice === null ||
+                newDescription === null ||
+                newImage === null
+            ) {
+                return;
+            }
+
+
+            await updateProduct(product.id, {
+                title: newTitle,
+                price: newPrice,
+                description: newDescription,
+                image: newImage
+            });
+
+        });
+
 
         deleteButton.addEventListener("click", async function() {
 
-    await deleteDoc(
-        doc(db, "products", productId)
-    );
+            await softDeleteProduct(product.id);
 
-    });
+        });
 
-    updateButton.addEventListener("click", async function() {
-
-    let newTitle = prompt(
-        "Enter new title:",
-        product.title
-    );
-
-
-    let newPrice = prompt(
-        "Enter new price:",
-        product.price
-    );
-
-
-    let newDescription = prompt(
-        "Enter new description:",
-        product.description
-    );
-
-
-    let newImage = prompt(
-        "Enter new image URL:",
-        product.image
-    );
-
-
-    await updateDoc(
-        doc(db, "products", productId),
-        {
-
-            title: newTitle,
-
-            price: newPrice,
-
-            description: newDescription,
-
-            image: newImage
-
-        }
-    );
-
-});
-
-
-        card.appendChild(title);
-
-        card.appendChild(price);
-
-        card.appendChild(description);
-
-        card.appendChild(image);
 
         card.appendChild(updateButton);
-
         card.appendChild(deleteButton);
+    }
 
 
-        firebaseProductsContainer.appendChild(card);
+    productsContainer.appendChild(card);
+}
 
-    });
 
-});
+// Pagination
+function renderPagination(totalProducts) {
+
+    paginationContainer.innerHTML = "";
+
+    let totalPages = Math.ceil(totalProducts / productsPerPage);
+
+
+    for (let i = 1; i <= totalPages; i++) {
+
+        let button = document.createElement("button");
+
+        button.textContent = i;
+
+
+        button.addEventListener("click", function() {
+
+            currentPage = i;
+
+            renderProducts();
+
+        });
+
+
+        paginationContainer.appendChild(button);
+    }
+}
+
+
+loadApiProducts();
